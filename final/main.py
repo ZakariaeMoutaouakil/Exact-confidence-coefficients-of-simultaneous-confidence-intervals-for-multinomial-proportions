@@ -1,5 +1,5 @@
-from typing import Callable, Tuple
 import time
+from typing import Callable, Tuple
 
 from candidate_minimizers.generate_unique_matrix import generate_unique_matrix
 from candidate_minimizers.rank_endpoints import rank_endpoints
@@ -9,7 +9,7 @@ from final.filter_candidates import filter_candidates
 from final.transform_to_probability_vector import transform_to_probability_vector
 from find_minimizer.find_minimizer import find_minimizer
 
-for N in [100]:
+for N in [10, 20, 30]:
     print("N =", N)
     start_time = time.time()  # Start time measurement
     K = 3

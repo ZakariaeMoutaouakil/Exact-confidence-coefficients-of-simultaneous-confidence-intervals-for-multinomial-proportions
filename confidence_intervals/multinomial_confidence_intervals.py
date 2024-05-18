@@ -1,38 +1,39 @@
-from typing import List, Tuple
-
+import numpy as np
 from scipy.stats import norm
 
 
-def multinomial_confidence_intervals(x: List[int], alpha: float = 0.05) -> List[Tuple[float, float]]:
+def multinomial_confidence_intervals(x: np.ndarray, alpha: float = 0.05) -> np.ndarray:
     """
-    Calculates confidence intervals for the probabilities of a multinomial distribution.
+    Calculates confidence intervals for the probabilities of a multinomial distribution using NumPy.
 
     Parameters:
-        x (List[int]): List of counts for each category.
+        x (np.ndarray): Array of counts for each category.
         alpha (float): Significance level for the confidence intervals, default is 0.05 for 95% confidence.
 
-    Returns: List[Tuple[float, float]]: Each tuple contains the lower and upper bounds of the confidence interval for
-    each probability.
+    Returns: np.ndarray: Array where each row contains the lower and upper bounds of the confidence interval for each probability.
     """
-    n = sum(x)  # Total count
+    n = np.sum(x)  # Total count
     z_alpha_half = norm.ppf(1 - alpha / 2)
 
-    confidence_intervals: List[Tuple[float, float]] = []
-    for count in x:
-        p_hat = count / n  # MLE of probability
-        margin_of_error = z_alpha_half / (2 * (n ** 0.5))
+    # MLE of probability for each category
+    p_hat = x / n
 
-        lower_bound = max(p_hat - margin_of_error, 0)  # Ensure that probability is not negative
-        upper_bound = min(p_hat + margin_of_error, 1)  # Ensure that probability does not exceed 1
+    # Margin of error for each category
+    margin_of_error = z_alpha_half / (2 * np.sqrt(n))
 
-        confidence_intervals.append((lower_bound, upper_bound))
+    # Calculating lower and upper bounds ensuring bounds are within [0, 1]
+    lower_bounds = np.maximum(p_hat - margin_of_error, 0)  # Ensure that probabilities are not negative
+    upper_bounds = np.minimum(p_hat + margin_of_error, 1)  # Ensure that probabilities do not exceed 1
+
+    # Combine lower and upper bounds into a single array of tuples
+    confidence_intervals = np.column_stack((lower_bounds, upper_bounds))
 
     return confidence_intervals
 
 
 # Example usage:
 if __name__ == "__main__":
-    counts = [100, 200, 700]  # Example counts for three categories
+    counts = np.array([100, 200, 700])  # Example counts for three categories, as a NumPy array
     risk = 0.05  # 95% confidence level
     results = multinomial_confidence_intervals(counts, risk)
 

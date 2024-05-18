@@ -1,29 +1,40 @@
 from itertools import combinations_with_replacement
-from typing import List
+
+import numpy as np
 
 
-def generate_unique_matrix(k: int, elements: List[float]) -> List[List[float]]:
-    """Generates a unique matrix where each row is a vector of size n,
-    composed of elements from the list, and the sum of the elements in each row is ≤ 1.
-    Rows are considered unique if they are not permutations of each other."""
-    unique_rows = set()
+def generate_unique_matrix(k: int, elements: np.ndarray) -> np.ndarray:
+    """
+    Generates a unique matrix where each row is a vector of size k,
+    composed of elements from the NumPy array, and the sum of the elements in each row is ≤ 1.
+    Rows are considered unique if they are not permutations of each other.
 
-    # Generate all possible combinations with replacement of the elements with size n
-    for combination in combinations_with_replacement(elements, k):
-        if sum(combination) <= 1:
-            # Sort the combination to ensure permutations are considered identical
-            sorted_combination = tuple(sorted(combination))
-            unique_rows.add(sorted_combination)
+    Parameters:
+        k (int): The size of each combination vector.
+        elements (np.ndarray): An array of float elements to combine.
 
-    # Convert the set of unique rows back to a list of lists
-    matrix = [list(row) for row in unique_rows]
-    return matrix
+    Returns:
+        np.ndarray: An array of unique vectors meeting the sum condition.
+    """
+    # Generate all possible combinations with replacement of the elements with size k
+    all_combinations = np.array(list(combinations_with_replacement(elements, k)))
+
+    # Filter combinations where the sum is less than or equal to 1
+    sum_filter = np.sum(all_combinations, axis=1) <= 1
+    valid_combinations = all_combinations[sum_filter]
+
+    # Sort each combination to prevent permutations being treated as unique
+    sorted_combinations = np.sort(valid_combinations, axis=1)
+
+    # Use np.unique to find unique rows
+    unique_combinations = np.unique(sorted_combinations, axis=0)
+
+    return unique_combinations
 
 
 if __name__ == "__main__":
     # Example usage
     k_ = 2
-    elements_ = [0.1, 0.2, 0.9]
+    elements_ = np.array([0.1, 0.2, 0.9])
     result_matrix = generate_unique_matrix(k_, elements_)
-    for r in result_matrix:
-        print(r)
+    print(result_matrix)
