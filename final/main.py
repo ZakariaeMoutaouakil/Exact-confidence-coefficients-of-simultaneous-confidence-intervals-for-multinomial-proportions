@@ -27,11 +27,12 @@ for N in [10, 20, 30]:
     print("Elapsed time:", elapsed_time)
 
     start_time = time.time()  # Start time measurement
-    min_value, minimizer = find_minimizer(N, filtered_candidates, multinomial_confidence_intervals)
+    second_min_value, minimizer = find_minimizer(N, filtered_candidates, multinomial_confidence_intervals)
     end_time = time.time()  # End time measurement
     elapsed_time = end_time - start_time  # Calculate elapsed time
     print("With Filtering:")
-    print("Minimum value:", min_value)
+    print("Minimum value:", second_min_value)
     print("Minimizer:", transform_to_probability_vector(minimizer))
-    print("Risk:", 1 - min_value)
+    print("Risk:", 1 - second_min_value)
+    print("Risk gain:", second_min_value - min_value)
     print("Elapsed time:", elapsed_time)
