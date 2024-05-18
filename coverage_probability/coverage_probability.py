@@ -1,11 +1,13 @@
 import math
 from itertools import product
-from typing import List, Tuple
+from typing import List, Tuple, Callable
+
+from confidence_intervals.multinomial_confidence_intervals import multinomial_confidence_intervals
 
 
 def indicator(x: float, interval: Tuple[float, float]):
     """Indicator function that checks if x is in the interval."""
-    return 1 if interval[0] <= x <= interval[1] else 0
+    return True if interval[0] <= x <= interval[1] else False
 
 
 def multinomial_coefficient(n: int, x: Tuple[int]):
@@ -16,23 +18,23 @@ def multinomial_coefficient(n: int, x: Tuple[int]):
 def coverage_probability(
         n: int,
         p: List[float],
-        intervals: List[Tuple[float, float]],
-        precision: int = 10,
+        multinomial_confidence_interval: Callable[[List[int]], List[Tuple[float, float]]],
         debug: bool = False
 ):
     """Calculates the coverage probability."""
     d = len(p)
     coverage_prob = 0.
 
-    if not all(indicator(p[i], intervals[i]) for i in range(d)):
-        return coverage_prob
-    else:
-        # Generate all possible combinations of x1, x2, ..., xd
-        for x in product(range(n + 1), repeat=(d + 1)):
-            if sum(x) == n:
-                if debug:
-                    print(x)
+    # Generate all possible combinations of x1, x2, ..., xd
+    for x in product(range(n + 1), repeat=(d + 1)):
+        if sum(x) == n:
+            if debug:
+                print(x)
 
+            # Calculate the confidence intervals
+            intervals = multinomial_confidence_interval(x)
+
+            if all(indicator(p[i], intervals[i]) for i in range(d)):
                 # Calculate the multinomial coefficient
                 multinom_coeff = multinomial_coefficient(n, x)
                 # print(multinom_coeff)
@@ -43,13 +45,13 @@ def coverage_probability(
                 # Update the coverage probability sum
                 coverage_prob += multinom_coeff * prob_product
 
-        return coverage_prob #if debug else round(coverage_prob, precision)
+    return coverage_prob
 
 
 if __name__ == '__main__':
     # Example usage
     n_ = 4
     p_ = [0.2, 0.5]
-    intervals_ = [(0.0, 0.25), (0.45, 0.6), (0.25, 0.4)]
+    multinomial_confidence_intervals_ = multinomial_confidence_intervals
 
-    print(coverage_probability(n_, p_, intervals_, debug=True))
+    print(coverage_probability(n_, p_, multinomial_confidence_intervals_, debug=True))

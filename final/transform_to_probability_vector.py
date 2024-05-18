@@ -1,4 +1,7 @@
-def transform_to_probability_vector(vector):
+from typing import List
+
+
+def transform_to_probability_vector(vector: List[float], precision: int = 10):
     """
     Transform a vector whose sum is less than 1 into a probability vector.
 
@@ -14,7 +17,7 @@ def transform_to_probability_vector(vector):
     # Check if the sum is less than 1
     if sum_of_coordinates < 1:
         # Append the difference between 1 and the sum of existing coordinates to make it a probability vector
-        appended_coordinate = round(1 - sum_of_coordinates, 10)  # rounding to ensure precision
+        appended_coordinate = round(1 - sum_of_coordinates, precision)  # rounding to ensure precision
         probability_vector = vector + [appended_coordinate]
         return probability_vector
     else:
@@ -22,8 +25,9 @@ def transform_to_probability_vector(vector):
         return vector
 
 
-# Example usage:
-input_vector = [0.2, 0.3, 0.4]  # Example input vector
-output_vector = transform_to_probability_vector(input_vector)
-print("Input Vector:", input_vector)
-print("Probability Vector:", output_vector)
+if __name__ == "__main__":
+    # Example usage:
+    input_vector = [0.2, 0.3, 0.4]  # Example input vector
+    output_vector = transform_to_probability_vector(input_vector)
+    print("Input Vector:", input_vector)
+    print("Probability Vector:", output_vector)
