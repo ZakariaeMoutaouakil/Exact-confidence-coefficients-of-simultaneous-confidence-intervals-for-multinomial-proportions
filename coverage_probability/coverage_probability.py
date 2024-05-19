@@ -5,9 +5,9 @@ from typing import List, Tuple, Callable
 from confidence_intervals.multinomial_confidence_intervals import multinomial_confidence_intervals
 
 
-def indicator(x: float, interval: Tuple[float, float]):
+def indicator(x: float, interval: Tuple[float, float]) -> bool:
     """Indicator function that checks if x is in the interval."""
-    return True if interval[0] <= x <= interval[1] else False
+    return interval[0] <= x <= interval[1]
 
 
 def multinomial_coefficient(n: int, x: Tuple[int]):

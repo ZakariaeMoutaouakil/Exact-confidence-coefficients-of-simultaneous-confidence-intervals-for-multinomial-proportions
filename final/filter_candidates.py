@@ -1,12 +1,15 @@
-from typing import List
+from typing import List, Callable
 
-from final.filter_probability_vectors import filter_probability_vectors
+from final.filter_probability_vectors import filter_probability_vectors, filter_probability_vector
 from final.transform_to_probability_vector import transform_to_probability_vector
 
 
-def filter_candidates(candidates: List[List[float]], threshold: float = 0.5) -> List[List[float]]:
+def filter_candidates(
+        candidates: List[List[float]],
+        condition: Callable[[List[float]], bool] = filter_probability_vector
+) -> List[List[float]]:
     full_candidates = [transform_to_probability_vector(c) for c in candidates]
-    filtered_candidates = filter_probability_vectors(full_candidates, threshold)
+    filtered_candidates = filter_probability_vectors(full_candidates, condition)
     cropped_candidates = [c[:-1] for c in filtered_candidates]
     return cropped_candidates
 
@@ -14,7 +17,7 @@ def filter_candidates(candidates: List[List[float]], threshold: float = 0.5) -> 
 # Example usage
 if __name__ == "__main__":
     # Example list of candidates (vectors)
-    candidates_ = [
+    vectors = [
         [0.1, 0.2, 0.3, 0.4],
         [0.6, 0.4, 0.2, 0.1],
         [0.45, 0.55, 0.0, 0.0],
@@ -23,9 +26,9 @@ if __name__ == "__main__":
     ]
 
     # Filter the candidates
-    filtered_candidates_ = filter_candidates(candidates_)
+    filtered_vectors = filter_candidates(vectors)
 
     # Print the result
     print("Filtered Candidates:")
-    for candidate in filtered_candidates_:
+    for candidate in filtered_vectors:
         print(candidate)
