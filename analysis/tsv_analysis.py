@@ -1,10 +1,10 @@
 import os
 import time
-from typing import Callable, Tuple, List
+from typing import Callable, List
 
 from candidate_minimizers.generate_unique_matrix import generate_unique_matrix
 from candidate_minimizers.rank_endpoints import rank_endpoints
-from confidence_intervals.confidence_interval import confidence_interval
+from confidence_intervals.confidence_interval import ConfidenceIntervalCalculator, BaseConfidenceIntervalCalculator
 from confidence_intervals.multinomial_confidence_intervals import multinomial_confidence_intervals
 from final.filter_candidates import filter_candidates
 from final.filter_probability_vectors import filter_probability_vector
@@ -17,6 +17,7 @@ def check_existing_entry(
         N: int,
         K: int,
         confidence_interval_function_name: str,
+        alpha: float,
         condition_name: str
 ) -> bool:
     """
@@ -37,7 +38,7 @@ def check_existing_entry(
 
     with open(file_path, 'r') as file:
         for line in file:
-            if line.startswith(f"{N}\t{K}\t{confidence_interval_function_name}\t{condition_name}"):
+            if line.startswith(f"{N}\t{K}\t{confidence_interval_function_name}\t{alpha}\t{condition_name}"):
                 return True
 
     return False
@@ -47,22 +48,26 @@ def tsv_analysis(
         N: int,
         K: int,
         file_path: str,
-        confidence_interval_function: Callable[[float, int], Tuple[float, float]],
+        confidence_interval_function: BaseConfidenceIntervalCalculator,
         condition: Callable[[List[float]], bool] = None,
+        alpha: float = 0.05,
         debug: bool = False
 ) -> float | None:
     confidence_interval_function_name = confidence_interval_function.__name__
+    confidence_interval_function_alpha = confidence_interval_function.alpha
     condition_name = condition.__name__ if condition else ''
 
     if debug:
         print("N =", N)
         print("K =", K)
-        print("Confidence Interval Function =", confidence_interval_function_name)
+        print("Confidence Interval Function Name =", confidence_interval_function_name)
+        print("Confidence Interval Function Alpha =", confidence_interval_function_alpha)
         print("Condition =", condition_name)
 
-    if check_existing_entry(file_path, N, K, confidence_interval_function_name, condition_name):
+    if check_existing_entry(file_path, N, K, confidence_interval_function_name, confidence_interval_function_alpha,
+                            condition_name):
         print(
-            f"Entry for N={N}, K={K}, confidence_interval_function={confidence_interval_function_name}, condition={condition_name} already exists. Skipping computation."
+            f"Entry for N={N}, K={K}, confidence_interval_function={confidence_interval_function_name}, alpha={alpha}, condition={condition_name} already exists. Skipping computation."
         )
         return None
 
@@ -94,7 +99,7 @@ def tsv_analysis(
     risk = 1 - min_value
 
     # Prepare data as a string formatted for TSV
-    data_row = f"{N}\t{K}\t{confidence_interval_function_name}\t{condition_name}\t{filtering_status}\t{min_value}\t{minimizer_vector}\t{risk}\t{elapsed_time}\n"
+    data_row = f"{N}\t{K}\t{confidence_interval_function_name}\t{confidence_interval_function_alpha}\t{condition_name}\t{filtering_status}\t{min_value}\t{minimizer_vector}\t{risk}\t{elapsed_time}\n"
 
     # Write to file
     with open(file_path, 'a') as file:
@@ -109,8 +114,9 @@ def tsv_analysis_multiple(
         N_values: List[int],
         K_values: List[int],
         file_path: str,
-        confidence_interval_function_values: List[Callable[[float, int], Tuple[float, float]]],
+        confidence_interval_function_values: List[BaseConfidenceIntervalCalculator],
         condition: Callable[[List[float]], bool] = None,
+        alpha: float = 0.05,
         debug: bool = False
 ) -> List[float]:
     # Check if file exists and write headers if it doesn't
@@ -119,14 +125,14 @@ def tsv_analysis_multiple(
             print(f"{file_path} does not exist. Creating file and adding headers.")
         with open(file_path, 'w') as f:
             f.write(
-                "N\tK\tConfidence Interval Function\tCondition\tFiltering\tMinimum Value\tMinimizer\tRisk\tElapsed Time\n"
+                "N\tK\tConfidence Interval Function\tConfidence Interval Function Alpha\tCondition\tFiltering\tMinimum Value\tMinimizer\tRisk\tElapsed Time\n"
             )
 
     risks = []
     for N in N_values:
         for K in K_values:
             for confidence_interval_function in confidence_interval_function_values:
-                risk = tsv_analysis(N, K, file_path, confidence_interval_function, condition, debug)
+                risk = tsv_analysis(N, K, file_path, confidence_interval_function, condition, alpha, debug)
                 if risk is not None:
                     risks.append(risk)
     return risks
@@ -135,15 +141,14 @@ def tsv_analysis_multiple(
 # Example usage
 if __name__ == '__main__':
     file_path = 'analysis_results.tsv'
-    N_values = [10, 15, 20, 25]
+    N_values = [40, 50, 60, 70, 80]
     K_values = [3]  # Assuming we want to use a single K value, but it could be a list of values
-    conf_interval = confidence_interval
-    conf_interval.__name__ = 'Fitzpatrick and Scott'
+    conf_interval = ConfidenceIntervalCalculator()
     confidence_interval_functions = [conf_interval]  # List of functions
 
     thresholds = [0.5, 0.6, 0.7, 0.8, 0.9]
     for th in thresholds:
         condition = lambda v: filter_probability_vector(v, threshold=th)
-        condition.__name__ = f'Threshold_{th}'  # Name the lambda for file recording
+        condition.__name__ = f'Threshold={th}'  # Name the lambda for file recording
         # Execute analysis for each condition
         tsv_analysis_multiple(N_values, K_values, file_path, confidence_interval_functions, condition, debug=True)
