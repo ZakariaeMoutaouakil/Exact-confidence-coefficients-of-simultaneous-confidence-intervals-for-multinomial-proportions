@@ -4,9 +4,9 @@ from final.filter_probability_vectors import filter_probability_vectors
 from final.transform_to_probability_vector import transform_to_probability_vector
 
 
-def filter_candidates(candidates: List[List[float]]) -> List[List[float]]:
+def filter_candidates(candidates: List[List[float]], threshold: float = 0.5) -> List[List[float]]:
     full_candidates = [transform_to_probability_vector(c) for c in candidates]
-    filtered_candidates = filter_probability_vectors(full_candidates)
+    filtered_candidates = filter_probability_vectors(full_candidates, threshold)
     cropped_candidates = [c[:-1] for c in filtered_candidates]
     return cropped_candidates
 

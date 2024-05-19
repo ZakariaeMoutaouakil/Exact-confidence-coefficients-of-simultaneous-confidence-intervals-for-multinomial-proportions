@@ -1,18 +1,19 @@
 from typing import List
 
 
-def filter_probability_vectors(prob_vectors: List[List[float]]) -> List[List[float]]:
+def filter_probability_vectors(prob_vectors: List[List[float]], threshold: float = 0.5) -> List[List[float]]:
     """
     Filters a list of probability vectors, keeping only those with at least one element greater than 0.5.
 
     Parameters:
-        prob_vectors (List[List[float]]): List of probability vectors.
+        :param prob_vectors:
+        :param threshold:
 
     Returns:
         List[List[float]]: Filtered list of probability vectors.
     """
     # Filter and keep vectors where any element is greater than 0.5
-    filtered_vectors = [vector for vector in prob_vectors if any(prob > 0.5 for prob in vector)]
+    filtered_vectors = [vector for vector in prob_vectors if any(prob > threshold for prob in vector)]
     return filtered_vectors
 
 
