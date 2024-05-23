@@ -14,15 +14,10 @@ def transform_to_probability_vector(vector: List[float], precision: int = 10):
     # Calculate the sum of the existing coordinates in the vector
     sum_of_coordinates = sum(vector)
 
-    # Check if the sum is less than 1
-    if sum_of_coordinates < 1:
-        # Append the difference between 1 and the sum of existing coordinates to make it a probability vector
-        appended_coordinate = round(1 - sum_of_coordinates, precision)  # rounding to ensure precision
-        probability_vector = vector + [appended_coordinate]
-        return probability_vector
-    else:
-        # If the sum is already 1 or greater, return the input vector
-        return vector
+    # Append the difference between 1 and the sum of existing coordinates to make it a probability vector
+    appended_coordinate = round(1 - sum_of_coordinates, precision)  # rounding to ensure precision
+    probability_vector = vector + [appended_coordinate]
+    return probability_vector
 
 
 if __name__ == "__main__":

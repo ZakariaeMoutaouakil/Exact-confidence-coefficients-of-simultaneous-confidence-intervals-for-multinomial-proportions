@@ -56,8 +56,8 @@ if __name__ == '__main__':
     K = 3
     confidence_interval_function = ConfidenceIntervalCalculator()
     alpha = 0.05
-    condition_starts_with = "EntropyThreshold="  # Replace "YourStringHere" with the string you want to filter
-    min_N = 40  # Minimum value of N
-    max_N = 100  # Maximum value of N
+    condition_starts_with = ""  # Replace "YourStringHere" with the string you want to filter
+    min_N = 20  # Minimum value of N
+    max_N = 40  # Maximum value of N
 
     plot_risks_vs_N(file_path, K, confidence_interval_function, condition_starts_with, min_N, max_N)
